@@ -1,0 +1,108 @@
+{
+	"info": {
+		"_postman_id": "2a1f3e34-5e8b-4e90-a11f-ed32679e8601",
+		"name": "express-todo-api",
+		"description": "A set of HTTP requests to demonstrate the usage of Express ToDo API service.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31669335"
+	},
+	"item": [
+		{
+			"name": "localhost:3000/api/todos/11",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/todos/11",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"todos",
+						"11"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/api/todos",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Finish todo controller\",\n    \"completed\": false,\n    \"userId\": 10\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/todos",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"todos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/api/todos/11",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"update todo controller\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/todos/11",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"todos",
+						"11"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:3000/api/todos/11",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/todos/11",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"todos",
+						"11"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
