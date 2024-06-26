@@ -54,31 +54,30 @@ class TodoController {
   async create(req, res, next) {
     const { title, completed = false, userId = randomInt() } = req.body;
 
-    db.run(
-      "INSERT INTO todos (title, completed, userId) VALUES (?, ?, ?)",
-      [title, completed, userId],
-      function (err) {
-        if (err) {
-          next(err);
-          return;
-        }
+    try {
+      const result = await new Promise((resolve, reject) => {
+        db.run(
+          "INSERT INTO todos (title, completed, userId) VALUES (?, ?, ?)",
+          [title, completed, userId],
+          function (err) {
+            if (err) {
+              reject(err);
+              return;
+            }
 
-        if (this.changes) {
-          res.status(httpStatus.CREATED).json({
-            id: this.lastID,
-            title,
-            completed,
-            userId,
-          });
-        } else {
-          res.status(httpStatus.BAD_REQUEST).json({
-            status: httpStatus.BAD_REQUEST,
-            message: http.STATUS_CODES[httpStatus.BAD_REQUEST],
-            reason: `The requested route ${req.method} ${req.path} does not exist.`,
-          });
-        }
-      }
-    );
+            resolve({
+              id: this.lastID,
+              title,
+              completed,
+              userId,
+            });
+          }
+        );
+      });
+      res.status(httpStatus.CREATED).json(result);
+    } catch (err) {
+      next(err);
+    }
   }
 
   /**

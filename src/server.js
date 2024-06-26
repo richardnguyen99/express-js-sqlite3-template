@@ -7,10 +7,10 @@ const PORT = process.env.PORT || 3000;
 // and seeded before starting the server.
 db.serialize(() => {
   db.run(
-    `--sql
+    /*sql*/ `
     CREATE TABLE IF NOT EXISTS todos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
+      title TEXT UNIQUE NOT NULL,
       completed BOOLEAN NOT NULL DEFAULT 0,
       userId INTEGER NOT NULL,
       createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
