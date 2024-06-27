@@ -2,7 +2,7 @@ const express = require("express");
 const httpStatus = require("http-status");
 const http = require("node:http");
 
-const { TodoController } = require("../controllers");
+const { TodoController } = require("../../controllers");
 
 const router = express.Router({
   strict: true,

@@ -7,7 +7,7 @@
  */
 function randomInt(min = 1, max = 100) {
   if (typeof min !== "number" || typeof max !== "number") {
-    throw new Error("The value must be a number.");
+    throw new TypeError("The value must be a number.");
   }
 
   if (min > max) {

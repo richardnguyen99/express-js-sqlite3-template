@@ -1,5 +1,6 @@
 const { getMockReq, getMockRes } = require("@jest-mock/express");
-const db = require("../../../db");
+
+const db = require("../../db");
 const { TodoController } = require("../todo.controller");
 
 describe("Todo Controller", () => {
@@ -37,6 +38,22 @@ describe("Todo Controller", () => {
   });
 
   describe("create", () => {
+    it("should return an error if the todo object is missing", async () => {
+      const req = getMockReq();
+      const { res, next } = getMockRes();
+
+      try {
+        // Next function is called when an error occurs. However, this will
+        // be handled at route level, not controller level.
+        await todoController.create(req, res, next);
+      } catch (err) {
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe("Todo object is required.");
+        expect(next).toHaveBeenCalledWith(err);
+      }
+    });
+
     it("should create a new todo item", async () => {
       const req = getMockReq({
         body: {

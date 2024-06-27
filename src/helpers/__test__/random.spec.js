@@ -37,6 +37,9 @@ describe("random.js", () => {
 
     it("should throw an error if the value is not a number", () => {
       expect(() => randomInt("a", "b")).toThrow("The value must be a number.");
+      expect(() => randomInt(1, "b")).toThrow("The value must be a number.");
+      expect(() => randomInt("a", 100)).toThrow("The value must be a number.");
+      expect(() => randomInt(1, null)).toThrow("The value must be a number.");
     });
   });
 });

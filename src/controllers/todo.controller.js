@@ -1,12 +1,37 @@
 const httpStatus = require("http-status");
 const http = require("http");
 
-const db = require("../../db");
-const { randomInt } = require("../../helpers/random");
+const db = require("../db");
+const { TodoService } = require("../services");
+const { randomInt } = require("../helpers/random");
 
+/**
+ * Todo controller class.
+ *
+ * @description
+ * This class represents the controller for the todo resource, which is responsible
+ * for handling HTTP requests related to the todo resource. The class contains
+ * handlers for the following routes:
+ *
+ * - GET /todos
+ * - GET /todos/:id
+ * - POST /todos
+ * - PUT /todos/:id
+ * - DELETE /todos/:id
+ *
+ * @class
+ */
 class TodoController {
   /**
-   * Find all todo items.
+   * Create a new instance of TodoController
+   * @constructor
+   */
+  constructor() {
+    this.todoService = new TodoService();
+  }
+
+  /**
+   * Find all todo items. Handler for GET /todos.
    *
    * @param {import("express").Request} req - Express object representing the HTTP request
    * @param {import("express").Response} res - Express  object representing the HTTP response
@@ -24,7 +49,7 @@ class TodoController {
   }
 
   /**
-   * Find a todo item by id.
+   * Find a todo item by id. Handler for GET /todos/:id.
    *
    * @param {import("express").Request} req - Express object representing the HTTP request
    * @param {import("express").Response} res - Express  object representing the HTTP response
@@ -45,7 +70,7 @@ class TodoController {
   }
 
   /**
-   * Create a new todo item.
+   * Create a new todo item. Handler for POST /todos.
    *
    * @param {import("express").Request} req - Express object representing the HTTP request
    * @param {import("express").Response} res - Express  object representing the HTTP response
@@ -55,25 +80,12 @@ class TodoController {
     const { title, completed = false, userId = randomInt() } = req.body;
 
     try {
-      const result = await new Promise((resolve, reject) => {
-        db.run(
-          "INSERT INTO todos (title, completed, userId) VALUES (?, ?, ?)",
-          [title, completed, userId],
-          function (err) {
-            if (err) {
-              reject(err);
-              return;
-            }
-
-            resolve({
-              id: this.lastID,
-              title,
-              completed,
-              userId,
-            });
-          }
-        );
+      const result = await this.todoService.create({
+        title,
+        completed,
+        userId,
       });
+
       res.status(httpStatus.CREATED).json(result);
     } catch (err) {
       next(err);
@@ -81,7 +93,7 @@ class TodoController {
   }
 
   /**
-   * Update a todo item by id.
+   * Update a todo item by id. Handler for PUT /todos/:id.
    *
    * @param {import("express").Request} req - Express object representing the HTTP request
    * @param {import("express").Response} res - Express  object representing the HTTP response
@@ -134,7 +146,7 @@ class TodoController {
   }
 
   /**
-   * Delete a todo item by id.
+   * Delete a todo item by id. Handler for DELETE /todos/:id.
    *
    * @param {import("express").Request} req - Express object representing the HTTP request
    * @param {import("express").Response} res - Express  object representing the HTTP response
