@@ -6,37 +6,6 @@ const { TodoController } = require("../todo.controller");
 describe("Todo Controller", () => {
   const todoController = new TodoController();
 
-  beforeAll(async () => {
-    await new Promise((resolve, reject) => {
-      db.run(
-        /*sql*/ `
-    CREATE TABLE IF NOT EXISTS todos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT UNIQUE NOT NULL,
-      completed BOOLEAN NOT NULL DEFAULT 0,
-      userId INTEGER NOT NULL,
-      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
-      updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-    
-    -- Create a trigger to update the updatedAt column when a todo item is updated
-    CREATE TRIGGER IF NOT EXISTS update_todo
-    AFTER UPDATE ON todos
-    BEGIN
-      UPDATE todos SET updatedAt = CURRENT_TIMESTAMP WHERE id = OLD.id;
-    END;
-    `,
-        function (err) {
-          if (err) {
-            reject(err);
-          }
-
-          resolve();
-        }
-      );
-    });
-  });
-
   describe("create", () => {
     it("should return an error if the todo object is missing", async () => {
       const req = getMockReq();
@@ -117,10 +86,5 @@ describe("Todo Controller", () => {
         expect(next).toHaveBeenCalledWith(err);
       }
     });
-  });
-
-  afterAll(() => {
-    db.run(`DROP TABLE todos`);
-    db.close();
   });
 });

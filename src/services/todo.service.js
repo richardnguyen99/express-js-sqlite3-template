@@ -7,7 +7,7 @@ class TodoService {
     return new Promise((resolve, reject) => {
       const query = "SELECT * FROM todos";
 
-      db.all(query, params, (err, rows) => {
+      db.all(query, [], (err, rows) => {
         if (err) {
           reject(err);
           return;
