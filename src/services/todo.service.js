@@ -3,16 +3,11 @@ const db = require("../db");
 class TodoService {
   constructor() {}
 
-  async findAll(queryFilter = {}) {
+  async findAll() {
     return new Promise((resolve, reject) => {
       const query = "SELECT * FROM todos";
 
       db.all(query, [], (err, rows) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
         resolve(rows);
       });
     });
@@ -23,21 +18,16 @@ class TodoService {
       return Promise.reject(new Error("ID is required."));
     }
 
-    return new Promise((resolve, reject) => {
-      db.get("SELECT * FROM todos WHERE id = ?", id, (err, row) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+    if (isNaN(id)) {
+      return Promise.reject(new Error("ID must be a number."));
+    }
 
-        resolve(row);
-      });
-    });
-  }
+    if (id < 1) {
+      return Promise.reject(new Error("ID must be greater than 0."));
+    }
 
-  async findByEmail(email) {
     return new Promise((resolve, reject) => {
-      db.get("SELECT * FROM todos WHERE email = ?", email, (err, row) => {
+      db.get("SELECT * FROM todos WHERE id = ?", [id], (err, row) => {
         if (err) {
           reject(err);
           return;
@@ -60,7 +50,16 @@ class TodoService {
         function (err) {
           // Throw an error if the todo item cannot be created
           if (err) {
-            reject(err);
+            if (err.code === "SQLITE_CONSTRAINT") {
+              reject(
+                new Error(
+                  `Todo title must be unique. Found duplicate '${todo.title}'`
+                )
+              );
+            } else {
+              reject(new Error(err.message));
+            }
+
             return;
           }
 
@@ -111,11 +110,29 @@ class TodoService {
         params,
         function (err) {
           if (err) {
-            reject(err);
+            if (err.code === "SQLITE_CONSTRAINT") {
+              reject(
+                new Error(
+                  `Todo title must be unique. Found duplicate '${todo.title}'`
+                )
+              );
+            } else {
+              reject(new Error(err.message));
+            }
+
             return;
           }
 
-          resolve(this.changes);
+          if (this.changes === 1) {
+            resolve({
+              id: id,
+              title: todo.title,
+              completed: todo.completed,
+              userId: todo.userId,
+            });
+          } else {
+            reject(new Error("Todo item not found."));
+          }
         }
       );
     });
