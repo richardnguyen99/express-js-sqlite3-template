@@ -13,6 +13,10 @@ beforeAll(async () => {
       createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
       updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS empty_dbs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT
+    )
     
     -- Create a trigger to update the updatedAt column when a todo item is updated
     CREATE TRIGGER IF NOT EXISTS update_todo

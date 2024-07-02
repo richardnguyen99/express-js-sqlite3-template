@@ -108,6 +108,31 @@ describe("Todo Service", () => {
         );
       }
     });
+
+    it("should throw an exception on error", async () => {
+      // temporarily change the db.run method to throw an error
+      const originalRun = db.run;
+
+      // db.run will be called in the create service routine
+      db.run = jest.fn().mockImplementation((query, params, callback) => {
+        callback(new Error("Failed to run query"));
+      });
+
+      try {
+        await todoService.create({
+          title: "Buy groceries",
+          completed: false,
+          userId: 1,
+        });
+      } catch (err) {
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe("Failed to run query");
+      }
+
+      // restore the original db.run method
+      db.run = originalRun;
+    });
   });
 
   describe("findAll", () => {
@@ -117,6 +142,27 @@ describe("Todo Service", () => {
       expect(todos).toBeDefined();
       expect(Array.isArray(todos)).toBe(true);
       expect(todos).toHaveLength(3);
+    });
+
+    it("should throw an error on error", async () => {
+      // temporarily change the db.all method to throw an error
+      const originalAll = db.all;
+
+      // db.all will be called in the findAll service routine
+      db.all = jest.fn().mockImplementation((query, params, callback) => {
+        callback(new Error("Failed to run query"));
+      });
+
+      try {
+        await todoService.findAll();
+      } catch (err) {
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe("Failed to run query");
+      }
+
+      // restore the original db.all method
+      db.all = originalAll;
     });
   });
 
@@ -181,6 +227,27 @@ describe("Todo Service", () => {
         expect(err).toHaveProperty("message");
         expect(err.message).toBe("ID must be greater than 0.");
       }
+    });
+
+    it("should throw an error on error", async () => {
+      // temporarily change the db.all method to throw an error
+      const originalAll = db.get;
+
+      // db.all will be called in the findAll service routine
+      db.get = jest.fn().mockImplementation((query, params, callback) => {
+        callback(new Error("Failed to run db.get"));
+      });
+
+      try {
+        await todoService.findById(1);
+      } catch (err) {
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe("Failed to run db.get");
+      }
+
+      // restore the original db.all method
+      db.get = originalAll;
     });
   });
 
@@ -266,7 +333,7 @@ describe("Todo Service", () => {
 
     it("should return an error if the todo item does not exist", async () => {
       try {
-        await todoService.update({
+        await todoService.update(100, {
           id: 100,
           title: "Buy groceries",
           completed: false,
@@ -274,8 +341,98 @@ describe("Todo Service", () => {
         });
       } catch (err) {
         expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(Error);
+        expect(err).toHaveProperty("message");
+        expect(err.message).toBe("Todo item not found.");
+      }
+    });
+
+    it("should return an error if the todo object is invalid", async () => {
+      try {
+        await todoService.update(new Animation(), {
+          title: "Buy groceries",
+          completed: true,
+          invalid: true,
+        });
+      } catch (err) {
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(Error);
         expect(err).toHaveProperty("message");
       }
+    });
+
+    it("should throw an exception on error", async () => {
+      // temporarily change the db.run method to throw an error
+      const originalRun = db.run;
+
+      // db.run will be called in the update service routine
+      db.run = jest.fn().mockImplementation((query, params, callback) => {
+        callback(new Error("Failed to run query"));
+      });
+
+      try {
+        await todoService.update(1, {
+          title: "Buy groceries",
+          completed: false,
+          userId: 1,
+        });
+      } catch (err) {
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe("Failed to run query");
+      }
+
+      // restore the original db.run method
+      db.run = originalRun;
+    });
+  });
+
+  describe("delete", () => {
+    it("should delete a todo item by ID = 1", async () => {
+      const todo = await todoService.delete(1);
+
+      expect(todo).toBeDefined();
+      expect(todo).toBe(1);
+    });
+
+    it("should return an error if the ID is missing", async () => {
+      try {
+        await todoService.delete();
+      } catch (err) {
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe("ID is required.");
+      }
+    });
+
+    it("should return an error if the todo item does not exist", async () => {
+      try {
+        await todoService.delete(100);
+      } catch (err) {
+        expect(err).toBeDefined();
+        expect(err).toHaveProperty("message");
+      }
+    });
+
+    it("should throw an exception on error", async () => {
+      // temporarily change the db.run method to throw an error
+      const originalRun = db.run;
+
+      // db.run will be called in the delete service routine
+      db.run = jest.fn().mockImplementation((query, params, callback) => {
+        callback(new Error("Failed to run query"));
+      });
+
+      try {
+        await todoService.delete(1);
+      } catch (err) {
+        expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe("Failed to run query");
+      }
+
+      // restore the original db.run method
+      db.run = originalRun;
     });
   });
 });

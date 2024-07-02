@@ -8,6 +8,11 @@ class TodoService {
       const query = "SELECT * FROM todos";
 
       db.all(query, [], (err, rows) => {
+        if (err) {
+          reject(new Error(err.message));
+          return;
+        }
+
         resolve(rows);
       });
     });
@@ -29,7 +34,7 @@ class TodoService {
     return new Promise((resolve, reject) => {
       db.get("SELECT * FROM todos WHERE id = ?", [id], (err, row) => {
         if (err) {
-          reject(err);
+          reject(new Error(err.message));
           return;
         }
 
@@ -110,16 +115,7 @@ class TodoService {
         params,
         function (err) {
           if (err) {
-            if (err.code === "SQLITE_CONSTRAINT") {
-              reject(
-                new Error(
-                  `Todo title must be unique. Found duplicate '${todo.title}'`
-                )
-              );
-            } else {
-              reject(new Error(err.message));
-            }
-
+            reject(new Error(err.message));
             return;
           }
 
@@ -139,14 +135,22 @@ class TodoService {
   }
 
   async delete(id) {
+    if (!id) {
+      return Promise.reject(new Error("ID is required."));
+    }
+
     return new Promise((resolve, reject) => {
-      db.run("DELETE FROM todos WHERE id = ?", id, function (err) {
+      db.run("DELETE FROM todos WHERE id = ?", [id], function (err) {
         if (err) {
-          reject(err);
+          reject(new Error(err.message));
           return;
         }
 
-        resolve(this.changes);
+        if (this.changes === 1) {
+          resolve(this.changes);
+        } else {
+          reject(new Error("Todo item not found."));
+        }
       });
     });
   }
