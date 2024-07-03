@@ -1,3 +1,11 @@
+/**
+ * This module contains the controller for the todo resource, which is responsible
+ * for handling HTTP requests related to the todo resource.
+ *
+ * @fileoverview Controller for the todo resource.
+ */
+
+const express = require("express");
 const httpStatus = require("http-status");
 const http = require("http");
 
@@ -6,18 +14,15 @@ const { TodoService } = require("../services");
 const { randomInt } = require("../helpers/random");
 
 /**
- * Todo controller class.
- *
- * @description
  * This class represents the controller for the todo resource, which is responsible
  * for handling HTTP requests related to the todo resource. The class contains
  * handlers for the following routes:
  *
- * - GET /todos
- * - GET /todos/:id
- * - POST /todos
- * - PUT /todos/:id
- * - DELETE /todos/:id
+ * - `GET /todos`
+ * - `GET /todos/:id`
+ * - `POST /todos`
+ * - `PUT /todos/:id`
+ * - `DELETE /todos/:id`
  *
  * @class
  */
@@ -33,11 +38,11 @@ class TodoController {
   /**
    * Find all todo items. Handler for GET /todos.
    *
-   * @param {import("express").Request} req - Express object representing the HTTP request
-   * @param {import("express").Response} res - Express  object representing the HTTP response
-   * @param {import("express").NextFunction} next - Express function that calls the next middleware
+   * @param {express.Request} req - Express object representing the HTTP request
+   * @param {express.Response} res - Express  object representing the HTTP response
+   * @param {express.NextFunction} next - Express function that calls the next middleware
    */
-  async findAll(req, res, next) {
+  async findAll(_req, res, next) {
     db.all("SELECT * FROM todos", (err, rows) => {
       if (err) {
         next(err);
@@ -51,9 +56,9 @@ class TodoController {
   /**
    * Find a todo item by id. Handler for GET /todos/:id.
    *
-   * @param {import("express").Request} req - Express object representing the HTTP request
-   * @param {import("express").Response} res - Express  object representing the HTTP response
-   * @param {import("express").NextFunction} next - Express function that calls the next middleware
+   * @param {express.Request} req - Express object representing the HTTP request
+   * @param {express.Response} res - Express  object representing the HTTP response
+   * @param {express.NextFunction} next - Express function that calls the next middleware
    */
   async findOne(req, res, next) {
     db.get("SELECT * FROM todos WHERE id = ?", req.params.id, (err, row) => {
@@ -72,9 +77,9 @@ class TodoController {
   /**
    * Create a new todo item. Handler for POST /todos.
    *
-   * @param {import("express").Request} req - Express object representing the HTTP request
-   * @param {import("express").Response} res - Express  object representing the HTTP response
-   * @param {import("express").NextFunction} next - Express function that calls the next middleware
+   * @param {express.Request} req - Express object representing the HTTP request
+   * @param {express.Response} res - Express  object representing the HTTP response
+   * @param {express.NextFunction} next - Express function that calls the next middleware
    */
   async create(req, res, next) {
     const { title, completed = false, userId = randomInt() } = req.body;
@@ -95,9 +100,9 @@ class TodoController {
   /**
    * Update a todo item by id. Handler for PUT /todos/:id.
    *
-   * @param {import("express").Request} req - Express object representing the HTTP request
-   * @param {import("express").Response} res - Express  object representing the HTTP response
-   * @param {import("express").NextFunction} next - Express function that calls the next middleware
+   * @param {express.Request} req - Express object representing the HTTP request
+   * @param {express.Response} res - Express  object representing the HTTP response
+   * @param {express.NextFunction} next - Express function that calls the next middleware
    */
   async update(req, res, next) {
     const { title, completed } = req.body;
@@ -148,9 +153,9 @@ class TodoController {
   /**
    * Delete a todo item by id. Handler for DELETE /todos/:id.
    *
-   * @param {import("express").Request} req - Express object representing the HTTP request
-   * @param {import("express").Response} res - Express  object representing the HTTP response
-   * @param {import("express").NextFunction} next - Express function that calls the next middleware
+   * @param {express.Request} req - Express object representing the HTTP request
+   * @param {express.Response} res - Express  object representing the HTTP response
+   * @param {express.NextFunction} next - Express function that calls the next middleware
    */
   async delete(req, res, next) {
     db.run("DELETE FROM todos WHERE id = ?", req.params.id, function (err) {
