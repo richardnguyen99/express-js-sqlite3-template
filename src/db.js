@@ -1,3 +1,5 @@
+"use strict";
+
 const sqlite3 = require("sqlite3");
 
 // Create a new database in memory

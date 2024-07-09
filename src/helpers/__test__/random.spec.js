@@ -1,3 +1,5 @@
+"use strict";
+
 const { randomInt } = require("../random");
 
 describe("random.js", () => {

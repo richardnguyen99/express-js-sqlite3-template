@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * Returns a random integer between the specified values.
  *

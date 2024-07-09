@@ -1,3 +1,5 @@
+"use strict";
+
 const db = require("./db");
 
 // Create the table before running any tests

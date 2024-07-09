@@ -13,9 +13,5 @@
     "env": {
         "NODE_ENV": "development",
         "PORT": 3000
-    },
-    "events": {
-        "restart": "osascript -e 'display notification \"App restarted due to:\n- $FILENAME\n- $CHANGES\" with title \"nodemon\"'",
-        "crash": "osascript -e 'display notification \"App crashed due to:\n- $FILENAME\n- $CHANGES\" with title \"nodemon\"'"
     }
 }

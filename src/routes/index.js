@@ -1,3 +1,5 @@
+"use strict";
+
 const httpStatus = require("http-status");
 const express = require("express");
 
