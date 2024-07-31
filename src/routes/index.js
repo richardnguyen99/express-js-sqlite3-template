@@ -20,7 +20,7 @@ router.get("/robots.txt", (req, res) => res.status(204));
 router.all("*", (req, res) =>
   res.status(404).json({
     status: httpStatus.NOT_FOUND,
-    message: httpStatus["400_MESSAGE"],
+    message: "Not Found",
     reason: `The requested route ${req.method} ${req.path} does not exist.`,
   })
 );

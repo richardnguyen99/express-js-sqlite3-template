@@ -8,86 +8,6 @@ describe("Todo Controller", () => {
   const todoController = new TodoController();
 
   describe("create", () => {
-    // it("should return an error if the todo object is missing", async () => {
-    // const req = getMockReq();
-    // const { res, next } = getMockRes();
-
-    // try {
-    // // Next function is called when an error occurs. However, this will
-    // // be handled at route level, not controller level.
-    // await todoController.create(req, res, next);
-    // } catch (err) {
-    // expect(err).toBeDefined();
-    // expect(err).toBeInstanceOf(Error);
-    // expect(err.message).toBe("Todo object is required.");
-    // expect(next).toHaveBeenCalledWith(err);
-    // }
-    // });
-
-    // it("should create a new todo item", async () => {
-    // const req = getMockReq({
-    // body: {
-    // title: "Buy groceries",
-    // completed: false,
-    // userId: 1,
-    // },
-    // });
-    // const { res, next } = getMockRes();
-
-    // await todoController.create(req, res, next);
-
-    // expect(res.status).toHaveBeenCalledWith(201);
-    // expect(res.json).toHaveBeenCalledWith({
-    // id: expect.any(Number),
-    // title: "Buy groceries",
-    // completed: false,
-    // userId: 1,
-    // });
-    // });
-
-    // it("should return an error if the todo item cannot be created", async () => {
-    // const req = getMockReq({
-    // body: {
-    // title: "Buy groceries",
-    // completed: false,
-    // userId: 1,
-    // },
-    // });
-    // const { res, next } = getMockRes();
-
-    // try {
-    // // Next function is called when an error occurs. However, this will
-    // // be handled at route level, not controller level.
-    // await todoController.create(req, res, next);
-    // } catch (err) {
-    // expect(err).toBeDefined();
-    // expect(err).toBeInstanceOf(Error);
-    // expect(err.message).toBe("UNIQUE constraint failed: todos.title");
-    // expect(next).toHaveBeenCalledWith(err);
-    // }
-    // });
-
-    // it("should return an error if the title is missing", async () => {
-    // const req = getMockReq({
-    // body: {
-    // completed: false,
-    // userId: 1,
-    // },
-    // });
-    // const { res, next } = getMockRes();
-
-    // try {
-    // // Next function is called when an error occurs. However, this will
-    // // be handled at route level, not controller level.
-    // await todoController.create(req, res, next);
-    // } catch (err) {
-    // expect(err).toBeDefined();
-    // expect(err).toBeInstanceOf(Error);
-    // expect(err.message).toBe("Title is required");
-    // expect(next).toHaveBeenCalledWith(err);
-    // }
-    // });
-
     it("should create a new todo item", async () => {
       const req = getMockReq({
         body: {
@@ -109,6 +29,36 @@ describe("Todo Controller", () => {
           userId: 11,
         },
       });
+    });
+
+    it("should handle errors", async () => {
+      const originalRun = db.run;
+
+      db.run = jest.fn((query, params, callback) => {
+        callback(new Error("Failed to create todo item"));
+      });
+
+      const req = getMockReq({
+        body: {
+          title: "Test todo item for handling errors",
+          completed: false,
+          userId: 12,
+        },
+      }); // Mock the request object
+      const { res, next } = getMockRes(); // Mock the response object and the next function
+
+      const todoController = new TodoController();
+
+      // Call the create method with the mocked request and response objects
+      await todoController.create(req, res, next);
+
+      // Verify that the next function is called with an error
+      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(
+        new Error("Failed to create todo item")
+      );
+
+      db.run = originalRun;
     });
   });
 
@@ -164,6 +114,30 @@ describe("Todo Controller", () => {
       // Verify that the next function is not called
       expect(next).not.toHaveBeenCalled();
     });
+
+    it("should handle errors", async () => {
+      const originalFindOne = db.get;
+
+      db.get = jest.fn((query, params, callback) => {
+        callback(new Error("Failed to fetch todo item"));
+      });
+
+      const req = getMockReq({
+        params: { id: 1 },
+      }); // Mock the request object
+      const { res, next } = getMockRes(); // Mock the response object and the next function
+
+      const todoController = new TodoController();
+
+      // Call the findAll method with the mocked request and response objects
+      await todoController.findOne(req, res, next);
+
+      // Verify that the next function is called with an error
+      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(new Error("Failed to fetch todo item"));
+
+      db.get = originalFindOne;
+    });
   });
 
   describe("findAll", () => {
@@ -214,9 +188,146 @@ describe("Todo Controller", () => {
       await todoController.findAll(req, res, next);
 
       // Verify that the next function is called with an error
+      expect(next).toHaveBeenCalled();
       expect(next).toHaveBeenCalledWith(new Error("Failed to fetch todos"));
 
       db.all = originalFindAll;
+    });
+  });
+
+  describe("update", () => {
+    it("should update a todo item", async () => {
+      const req = getMockReq({
+        params: { id: 1 },
+        body: {
+          title: "Implement unit tests for todo controllers",
+          completed: true,
+          userId: 11,
+        },
+      });
+      const { res, next } = getMockRes();
+
+      await todoController.update(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.json).toHaveBeenCalledWith({
+        todo: {
+          id: 1,
+          title: "Implement unit tests for todo controllers",
+          completed: true,
+          userId: 11,
+        },
+      });
+    });
+
+    it("should handle todo item not found", async () => {
+      const req = getMockReq({
+        params: { id: 888 },
+        body: {
+          title: "Not found todo item",
+          completed: true,
+          userId: 13,
+        },
+      });
+      const { res, next } = getMockRes();
+
+      await todoController.update(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(httpStatus.NOT_FOUND);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Todo item not found",
+      });
+    });
+
+    it("should handle errors", async () => {
+      const originalRun = db.run;
+
+      db.run = jest.fn((query, params, callback) => {
+        callback(new Error("Failed to update todo item"));
+      });
+
+      const req = getMockReq({
+        params: { id: 1 },
+        body: {
+          title: "Test todo item for handling errors",
+          completed: false,
+          userId: 12,
+        },
+      }); // Mock the request object
+      const { res, next } = getMockRes(); // Mock the response object and the next function
+
+      const todoController = new TodoController();
+
+      // Call the update method with the mocked request and response objects
+      await todoController.update(req, res, next);
+
+      // Verify that the next function is called with an error
+      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(
+        new Error("Failed to update todo item")
+      );
+
+      db.run = originalRun;
+    });
+  });
+
+  describe("delete", () => {
+    it("should delete a todo item", async () => {
+      const req = getMockReq({ params: { id: 1 } });
+      const { res, next } = getMockRes();
+
+      const todoController = new TodoController();
+
+      await todoController.delete(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(httpStatus.OK);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Todo item deleted successfully",
+      });
+    });
+
+    it("should handle todo item not found", async () => {
+      const req = getMockReq({ params: { id: 999 } });
+      const { res, next } = getMockRes();
+
+      const todoController = new TodoController();
+      await todoController.delete(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(httpStatus.NOT_FOUND);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Todo item not found",
+      });
+    });
+
+    it("should handle errors", async () => {
+      const originalRun = db.run;
+      const originalGet = db.get;
+
+      db.run = jest.fn((query, params, callback) => {
+        callback(new Error("Failed to delete todo item"));
+      });
+
+      db.get = jest.fn((query, params, callback) => {
+        callback(new Error("Failed to delete todo item"));
+      });
+
+      const req = getMockReq({
+        params: { id: 11 },
+      }); // Mock the request object
+      const { res, next } = getMockRes(); // Mock the response object and the next function
+
+      // Call the update method with the mocked request and response objects
+      const todoController = new TodoController();
+      await todoController.delete(req, res, next);
+
+      // Verify that the next function is called with an error
+      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(
+        new Error("Failed to delete todo item")
+      );
+
+      db.run = originalRun;
+      db.get = originalGet;
     });
   });
 });

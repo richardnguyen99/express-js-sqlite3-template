@@ -43,6 +43,13 @@ class TodoController {
    */
   constructor() {
     this._todoService = new TodoService();
+
+    // Bind the methods to the class context
+    this.findAll = this.findAll.bind(this);
+    this.findOne = this.findOne.bind(this);
+    this.create = this.create.bind(this);
+    this.update = this.update.bind(this);
+    this.delete = this.delete.bind(this);
   }
 
   /**
@@ -111,15 +118,20 @@ class TodoController {
   async update(req, res, next) {
     const { id } = req.params;
     const todo = req.body;
+
     try {
-      const updatedTodo = await this._todoService.update(id, todo);
-      if (updatedTodo) {
-        res.status(httpStatus.OK).json({ todo: updatedTodo });
-      } else {
+      const item = await this._todoService.findById(id);
+
+      if (!item) {
         res
           .status(httpStatus.NOT_FOUND)
           .json({ message: "Todo item not found" });
+        return;
       }
+
+      const updatedTodo = await this._todoService.update(id, todo);
+
+      res.status(httpStatus.OK).json({ todo: updatedTodo });
     } catch (error) {
       next(error);
     }
@@ -135,14 +147,21 @@ class TodoController {
   async delete(req, res, next) {
     const { id } = req.params;
     try {
-      const deletedCount = await this._todoService.delete(id);
-      if (deletedCount > 0) {
-        res.status(httpStatus.NO_CONTENT).end();
-      } else {
+      const user = await this._todoService.findById(id);
+
+      if (!user) {
         res
           .status(httpStatus.NOT_FOUND)
           .json({ message: "Todo item not found" });
+
+        return;
       }
+
+      const deletedCount = await this._todoService.delete(id);
+
+      res.status(httpStatus.OK).json({
+        message: "Todo item deleted successfully",
+      });
     } catch (error) {
       next(error);
     }
