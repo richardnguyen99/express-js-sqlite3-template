@@ -1,10 +1,30 @@
 "use strict";
 
+/**
+ * This module contains the service for the todo database, which is responsible
+ * for handling asynchronous operations related to the todo database.
+ *
+ * @fileoverview Service for interacting with the todo database.
+ */
+
 const db = require("../db");
 
+/**
+ * This class represents the interaction with the todo database, which is responsible
+ * for handling asynchronous operations related to the todo database.
+ *
+ * @class
+ */
 class TodoService {
   constructor() {}
 
+  /**
+   * Find all todo items.
+   *
+   * @returns {Promise<Array>} A promise that returns an array of todo items
+   *
+   * @throws {Error} An internal error is thrown if the query fails or SQLite engine encounters an error
+   */
   async findAll() {
     return new Promise((resolve, reject) => {
       const query = "SELECT * FROM todos";
@@ -20,6 +40,15 @@ class TodoService {
     });
   }
 
+  /**
+   * Find a todo item by ID.
+   *
+   * @param {number} id - The ID of the todo item to find
+   * @returns {Promise<Object>} - A promise that returns a todo item
+   *
+   * @throws {Error} - An request error if the ID is not provided, is not a number, or is less than 1.
+   * @throws {Error} - An internal error if the query fails or SQLite engine encounters an error.
+   */
   async findById(id) {
     if (!id) {
       return Promise.reject(new Error("ID is required."));
@@ -45,6 +74,48 @@ class TodoService {
     });
   }
 
+  /**
+   * Find a todo item by title.
+   *
+   * @param {string} title - The title of the todo item to find
+   * @returns {Promise<Object>} - A promise that returns an array of todo items
+   *
+   * @throws {Error} - An request error if the title is not provided or is not a string.
+   * @throws {Error} - An internal error if the query fails or SQLite engine encounters an error.
+   */
+  async findByTitle(title) {
+    if (!title) {
+      return Promise.reject(new Error("Title is required."));
+    }
+
+    if (typeof title !== "string") {
+      return Promise.reject(new Error("Title must be a string."));
+    }
+
+    return new Promise((resolve, reject) => {
+      db.get("SELECT * FROM todos WHERE title = ?", [title], (err, row) => {
+        if (err) {
+          reject(new Error(err.message));
+          return;
+        }
+
+        resolve(row);
+      });
+    });
+  }
+
+  /**
+   * Create a new todo item.
+   *
+   * @param {Object} todo - The todo object to create
+   * @param {string} todo.title - The title of the todo item
+   * @param {boolean} todo.completed - The completion status of the todo item
+   * @param {number} todo.userId - The ID of the user that owns
+   *
+   * @returns {Promise<Object>} - A promise that returns the created todo item
+   * @throws {Error} - An request error if the todo object is not provided.
+   * @throws {Error} - An internal error if the query fails or SQLite engine encounters
+   */
   async create(todo) {
     if (!todo) {
       return Promise.reject(new Error("Todo object is required."));
@@ -82,6 +153,19 @@ class TodoService {
     });
   }
 
+  /**
+   * Update a todo item by ID.
+   *
+   * @param {number} id - The ID of the todo item to update
+   * @param {Object} todo  - The todo object to update
+   * @param {string} todo.title - The title of the todo item
+   * @param {boolean} todo.completed - The completion status of the todo item
+   * @param {number} todo.userId - The ID of the user that owns
+   * @returns {Promise<Object>} - A promise that returns the updated todo item
+   *
+   * @throws {Error} An request error if the ID or todo object is not provided.
+   * @throws {Error} An internal error if the query fails or SQLite engine encounters
+   */
   async update(id, todo) {
     if (!id) {
       return Promise.reject(new Error("ID is required."));
@@ -136,6 +220,15 @@ class TodoService {
     });
   }
 
+  /**
+   * Delete a todo item by ID.
+   *
+   * @param {number} id
+   * @returns <Promise<number>} - A promise that returns the number of todo items deleted
+   *
+   * @throws {Error} - An request error if the ID is not provided
+   * @throws {Error} - An internal error if the query fails or SQLite engine encounters an error
+   */
   async delete(id) {
     if (!id) {
       return Promise.reject(new Error("ID is required."));

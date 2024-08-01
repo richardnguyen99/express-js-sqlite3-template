@@ -100,9 +100,21 @@ class TodoController {
    */
   async create(req, res, next) {
     const todo = req.body;
+
     try {
-      const createdTodo = await this._todoService.create(todo);
-      res.status(httpStatus.CREATED).json({ todo: createdTodo });
+      const todoItem = await this._todoService.findByTitle(todo.title);
+
+      if (todoItem) {
+        res
+          .status(httpStatus.CONFLICT)
+          .json({ message: "Todo item already exists" });
+
+        return;
+      }
+
+      const newTodo = await this._todoService.create(todo);
+
+      res.status(httpStatus.CREATED).json({ todo: newTodo });
     } catch (error) {
       next(error);
     }
